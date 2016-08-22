@@ -1,13 +1,11 @@
 package red;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.security.InvalidParameterException;
 
 public class Calculate extends Thread {
 	private final int thread, totalThreads;
 	private int[] pixels;
-	private final BigDecimal x, y, width, height;
+	private final double x, y, width, height;
 	private int screenWidth, screenHeight;
 	boolean finished = false;
 	
@@ -21,7 +19,7 @@ public class Calculate extends Thread {
 	 * @param width The width of the screen.
 	 * @param height The height of the screen.
 	 */
-	public Calculate(int[] pixels, int thread, int totalThreads, BigDecimal x, BigDecimal y, BigDecimal width, BigDecimal height, int screenWidth, int screenHeight) {
+	public Calculate(int[] pixels, int thread, int totalThreads, double x, double y, double width, double height, int screenWidth, int screenHeight) {
 		this.setPriority(Thread.NORM_PRIORITY + 1);
 		this.thread = thread;
 		if(thread < 0 || thread >= totalThreads) {
@@ -42,14 +40,13 @@ public class Calculate extends Thread {
 		exit:
 		for(int row = thread; row < screenHeight; row += totalThreads) {
 			for(int col = 0; col < screenWidth; col++) {
-				BigDecimal c_real = new BigDecimal(col - screenWidth/2.0).multiply(width.divide(new BigDecimal(screenWidth),MathContext.DECIMAL32));
-				BigDecimal c_imaginary =new BigDecimal(row - screenHeight/2.0).multiply(height.divide(new BigDecimal(screenWidth),MathContext.DECIMAL32));
-				BigDecimal x = BigDecimal.ZERO;
-				BigDecimal y = BigDecimal.ZERO;
+				double c_real = (col - screenWidth/2.0) * width/screenWidth;
+				double c_imaginary = (row - screenHeight/2.0) * width/screenWidth;
+				double x = 0, y = 0;
 				int iteration = 0;
-				while((x.multiply(x)).add(y.multiply(y)).compareTo(new BigDecimal("4.0")) <= 0 && iteration < Config.MAX_ITERATIONS) {
-					BigDecimal x_new = (x.multiply(x)).subtract(y.multiply(y)).add(c_real);
-					y = ((new BigDecimal("2.0")).multiply(x).multiply(y)).add(c_imaginary);
+				while(x * x + y * y <= 4.0 && iteration < Config.MAX_ITERATIONS) {
+					double x_new = x * x - y * y + c_real;
+					y = 2.0 * x * y + c_imaginary;
 					x = x_new;
 					iteration++;
 					if(Thread.currentThread().isInterrupted()) {

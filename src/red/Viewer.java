@@ -6,7 +6,6 @@ import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 
 @SuppressWarnings("serial")
@@ -42,7 +41,7 @@ public class Viewer extends Canvas {
 				i--;
 			}
 			for(int i = 0; i < maxThreads; i++) {
-				threads.add(new Calculate(pixels, i, maxThreads, new BigDecimal("-2.0"), new BigDecimal("-2.0"), new BigDecimal("4.0"), new BigDecimal("4.0"), currentWidth, currentHeight));
+				threads.add(new Calculate(pixels, i, maxThreads, -2.0, -2.0, 4.0, 4.0, currentWidth, currentHeight));
 				threads.get(i).start();
 			}
 		}
