@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JFrame;
 
@@ -12,6 +14,7 @@ public class Main {
 
 	
 	public static void main(String[] args) {
+		
         JFrame frame = new JFrame("Mandelbrot Set");
         
         frame.setLayout(new BorderLayout());
@@ -28,12 +31,22 @@ public class Main {
         
         frame.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
-                panel.setSize(frame.getWidth(), frame.getHeight());
+                panel.setSize(frame.getWidth(), frame.getHeight(), true);
             }
         });
         
+        frame.addMouseWheelListener(new MouseWheelListener() {
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e) {
+				if(e.getWheelRotation() != 0) {
+					panel.zoom(e.getWheelRotation(), e.getX(), e.getY());
+				}
+			}
+        });
+        
+        panel.setSize(frame.getWidth(), frame.getHeight(), true);
         while (true) {
-        	panel.render();
+        	panel.render(false);
         	try {
 				Thread.sleep(100);
 			} catch (InterruptedException e1) {
