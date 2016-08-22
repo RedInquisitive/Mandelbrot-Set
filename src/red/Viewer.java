@@ -73,15 +73,19 @@ public class Viewer extends Canvas {
 		Toolkit.getDefaultToolkit().sync();
 	}
 
-	public void zoom(int wheelRotation, int x, int y) {
-		double percentX = (double)x / (double)lastWidth;
-		double percentY = (double)y / (double)lastHeight;
+	public void zoom(int wheelRotation, int cursorX, int cursorY) {
+		double percentX = (double)cursorX / (double)lastWidth;
+		double percentY = (double)cursorY / (double)lastHeight;
+		double x2 = x + width;
+		double y2 = y + height;
 		if(wheelRotation < 0) {
 			System.out.println("Zoom in!");
-			this.x = (this.x - 2.0) * ((1.0 - percentX) * (1.0 - Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) + Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) + 2.0;
-			this.width = this.width * Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN;
-			this.y = (this.y - yRatio) * ((1.0 - percentY) * (1.0 - Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) + Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) + yRatio;
-			this.height = this.height * Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN;
+			x = x * ((1.0 - percentX) * (1.0 - Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) * 2.0 + Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN);
+			x2 = x2 * (percentX * (1.0 - Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) * 2.0 + Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN);
+			y = y * ((1.0 - percentY) * (1.0 - Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) * 2.0 + Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN);
+			y2 = y2 * (percentY * (1.0 - Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN) * 2.0 + Config.PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN);
+			width = x2 - x;
+			height = y2 - y;
 			zoomLevel++;
 		}
 		if(wheelRotation > 0 && zoomLevel > 0) {
