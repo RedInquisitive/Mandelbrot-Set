@@ -39,7 +39,8 @@ public class Calculate extends Thread {
 	}
 	
 	public void run() {
-		exit: for(int row = thread; row < screenHeight; row += totalThreads) {
+		exit:
+		for(int row = thread; row < screenHeight; row += totalThreads) {
 			for(int col = 0; col < screenWidth; col++) {
 				BigDecimal c_real = new BigDecimal(col - screenWidth/2.0).multiply(width.divide(new BigDecimal(screenWidth),MathContext.DECIMAL32));
 				BigDecimal c_imaginary =new BigDecimal(row - screenHeight/2.0).multiply(height.divide(new BigDecimal(screenWidth),MathContext.DECIMAL32));
@@ -65,6 +66,11 @@ public class Calculate extends Thread {
 				}
 			}
 		}
+		System.out.println("Thread number " + thread + " is done.");
 		finished = true;
+	}
+	
+	public boolean isRunning() {
+		return !finished;
 	}
 }

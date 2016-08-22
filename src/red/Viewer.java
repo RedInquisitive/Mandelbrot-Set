@@ -29,29 +29,21 @@ public class Viewer extends Canvas {
 	}
 	
 	public void render() {
-		if(image != null) {
-			if(threads.size() != maxThreads) {
-				for(int i = 0; i < maxThreads; i++) {
-					threads.add(new Calculate(pixels, i, maxThreads, new BigDecimal("-2.0"), new BigDecimal("-2.0"), new BigDecimal("4.0"), new BigDecimal("4.0"), currentWidth, currentHeight));
-					threads.get(i).start();
-				}
-			}
-		}
 		if(lastWidth != currentWidth || lastHeight != currentHeight) {
 			lastWidth = currentWidth;
 			lastHeight = currentHeight;
 			image = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_RGB);
 			pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 			System.out.println("Screen size changed!");
-			if(threads.size() == maxThreads) {
-				for(int i = 0; i < maxThreads; i++) {
-					threads.get(0).interrupt();
-					threads.remove(0);
-				}
-				for(int i = 0; i < maxThreads; i++) {
-					threads.add(new Calculate(pixels, i, maxThreads, new BigDecimal("-2.0"), new BigDecimal("-2.0"), new BigDecimal("4.0"), new BigDecimal("4.0"), currentWidth, currentHeight));
-					threads.get(i).start();
-				}
+			for(int i = 0; i < threads.size(); i++) {
+				threads.get(0).interrupt();
+				while(threads.get(0).isRunning());
+				threads.remove(0);
+				i--;
+			}
+			for(int i = 0; i < maxThreads; i++) {
+				threads.add(new Calculate(pixels, i, maxThreads, new BigDecimal("-2.0"), new BigDecimal("-2.0"), new BigDecimal("4.0"), new BigDecimal("4.0"), currentWidth, currentHeight));
+				threads.get(i).start();
 			}
 		}
 		
