@@ -8,6 +8,7 @@ public class Calculate extends Thread {
 	private final double x, y, width, height;
 	private int screenWidth, screenHeight;
 	private boolean finished = false;
+	private boolean shouldQuit = false;
 	
 	/**
 	 * Dispatches a thread to calculate Mandelbrot.
@@ -23,7 +24,7 @@ public class Calculate extends Thread {
 		this.setPriority(Thread.NORM_PRIORITY + 1);
 		this.thread = thread;
 		if(thread < 0 || thread >= totalThreads) {
-			throw new InvalidParameterException("The running thread must be between 0 and " + totalThreads + ".");
+			throw new InvalidParameterException("The running thread must be between 0 and " + (totalThreads - 1) + ".");
 		}
 		this.totalThreads = totalThreads;
 		this.pixels = pixels;
@@ -49,8 +50,7 @@ public class Calculate extends Thread {
 					y = 2.0 * x * y + c_imaginary;
 					x = x_new;
 					iteration++;
-					if(Thread.currentThread().isInterrupted()) {
-						System.out.println("Stopping old thread. Thread number " + thread + " stopped!");
+					if(shouldQuit) {
 						break exit;
 					}
 				}
@@ -63,11 +63,19 @@ public class Calculate extends Thread {
 				}
 			}
 		}
-		System.out.println("Thread number " + thread + " is done.");
+		if(shouldQuit) {
+			System.out.println("Thread number " + thread + " quit prematurely!");
+		} else {
+			System.out.println("Thread number " + thread + " is done.");
+		}
 		finished = true;
 	}
 	
 	public boolean isRunning() {
 		return !finished;
+	}
+	
+	public void halt() {
+		this.shouldQuit = true;
 	}
 }

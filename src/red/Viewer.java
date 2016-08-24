@@ -43,9 +43,9 @@ public class Viewer extends Canvas {
 	public void render(boolean redraw) {
 		if(redraw || lastWidth != currentWidth || lastHeight != currentHeight) {
 			for(int i = 0; i < threads.size(); i++) {
-				threads.get(0).interrupt();
+				threads.get(0).halt();
 				while(threads.get(0).isRunning()) {
-					System.out.println("Borked");
+					try {Thread.sleep(10);} catch (InterruptedException e) {System.exit(0);}
 				}
 				threads.remove(0);
 				i--;
