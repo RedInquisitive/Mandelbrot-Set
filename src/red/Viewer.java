@@ -85,9 +85,9 @@ public class Viewer extends Canvas {
 	 */
 	public void reset() {
 		this.x1 = -2.0;
-		this.y1 = (double)lastHeight/(double)lastWidth * -2.0;
+		this.y1 = (double)currentHeight/(double)currentWidth * -2.0;
 		this.x2 = 2.0;
-		this.y2 = (double)lastHeight/(double)lastWidth * 2.0;
+		this.y2 = (double)currentHeight/(double)currentWidth * 2.0;
 	}
 
 	/**
