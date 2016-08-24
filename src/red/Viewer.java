@@ -19,44 +19,44 @@ public class Viewer extends Canvas {
 	private int lastWidth, lastHeight, currentWidth, currentHeight = 0;
 	
 	private double zoomLevel = 0;
-	private double x, y, yRatio, width, height;
+	private double x1, y1, x2, y2;
 	
+	/**
+	 * Creates a Canvas to draw the fractal on.
+	 * @param width Width of this component
+	 * @param height Height of this component
+	 */
 	public Viewer(int width, int height) {
-		setSize(width, height, true);
+		setSize(width, height);
+		lastWidth = width;
+		lastHeight = height;
 	}
 	
-	public void setSize(int width, int height, boolean reset) {
-		this.currentWidth = width;
-		this.currentHeight = height;
-		if(reset) {
-			this.x = -2.0;
-			this.y = (double)height/(double)width * -2.0;
-			this.width = 4.0;
-			this.height = (double)height/(double)width * 4.0;
-			this.yRatio = this.height / 2.0;
+	/**
+	 * Renders the fractal.
+	 */
+	public void render() {
+		for(int i = threads.size(); i > 0 ; i--) {
+			threads.get(0).halt();
+			threads.remove(0);
 		}
-		if(getParent() != null) {
-			render(true);
+		image = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_RGB);
+		pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+		for(int i = 0; i < maxThreads; i++) {
+			Calculate calculator = new Calculate(pixels, i, maxThreads, x1, y1, x2, y2, currentWidth, currentHeight);
+			calculator.start();
+			threads.add(calculator);
 		}
 	}
 	
-	public void render(boolean redraw) {
-		if(redraw || lastWidth != currentWidth || lastHeight != currentHeight) {
-			for(int i = 0; i < threads.size(); i++) {
-				threads.get(0).halt();
-				while(threads.get(0).isRunning()) {
-					try {Thread.sleep(10);} catch (InterruptedException e) {System.exit(0);}
-				}
-				threads.remove(0);
-				i--;
-			}
-			image = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_RGB);
-			pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
-			for(int i = 0; i < maxThreads; i++) {
-				Calculate calculator = new Calculate(pixels, i, maxThreads, x, y, width, height, currentWidth, currentHeight);
-				calculator.start();
-				threads.add(calculator);
-			}
+	/**
+	 * Updates the screen
+	 */
+	public void draw() {
+		if(lastWidth != currentWidth || lastHeight != currentHeight) {
+			lastWidth = currentWidth;
+			lastHeight = currentHeight;
+			render();
 		}
 		
 		final BufferStrategy bs = getBufferStrategy();
@@ -71,29 +71,50 @@ public class Viewer extends Canvas {
 		Toolkit.getDefaultToolkit().sync();
 	}
 
+	/**
+	 * Sets the size of this component.
+	 */
+	public void setSize(int width, int height) {
+		this.currentWidth = width;
+		this.currentHeight = height;
+		reset();
+	}
+
+	/**
+	 * Resets the zoom of the fractal.
+	 */
+	public void reset() {
+		this.x1 = -2.0;
+		this.y1 = (double)lastHeight/(double)lastWidth * -2.0;
+		this.x2 = 2.0;
+		this.y2 = (double)lastHeight/(double)lastWidth * 2.0;
+	}
+
+	/**
+	 * Zooms to a region of the fractal
+	 * @param wheelRotation
+	 * @param cursorX
+	 * @param cursorY
+	 */
 	public void zoom(int wheelRotation, int cursorX, int cursorY) {
 		double percentX = (double)cursorX / (double)lastWidth;
 		double percentY = (double)cursorY / (double)lastHeight;
-		double x2 = x + width;
-		double y2 = y + height;
 		if(wheelRotation < 0) {
 			System.out.println("Zoom in!");
-			x = x * ((1.0 - percentX) * (1.0 - Config.ZOOM_SCALE) * 2.0 + Config.ZOOM_SCALE);
+			x1 = x1 * ((1.0 - percentX) * (1.0 - Config.ZOOM_SCALE) * 2.0 + Config.ZOOM_SCALE);
 			x2 = x2 * (percentX * (1.0 - Config.ZOOM_SCALE) * 2.0 + Config.ZOOM_SCALE);
-			y = y * ((1.0 - percentY) * (1.0 - Config.ZOOM_SCALE) * 2.0 + Config.ZOOM_SCALE);
+			y1 = y1 * ((1.0 - percentY) * (1.0 - Config.ZOOM_SCALE) * 2.0 + Config.ZOOM_SCALE);
 			y2 = y2 * (percentY * (1.0 - Config.ZOOM_SCALE) * 2.0 + Config.ZOOM_SCALE);
-			width = x2 - x;
-			height = y2 - y;
 			zoomLevel++;
 		}
 		if(wheelRotation > 0 && zoomLevel > 0) {
 			zoomLevel--;
 			if(zoomLevel == 0) {
-				
+				reset();
 			}
 		}
-		lastWidth = currentWidth;
-		lastHeight = currentHeight;
-		render(true);
+		
+		render();
+		draw();
 	}
 }
