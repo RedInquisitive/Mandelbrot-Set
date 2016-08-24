@@ -10,5 +10,5 @@ public class Config {
 	
 	public static final int MAX_ITERATIONS = 256;
 	
-	public static final double PERCENT_OF_SCREEN_TO_KEEP_WHEN_ZOOMING_IN = 0.85;
+	public static final double ZOOM_SCALE = .10;
 }
