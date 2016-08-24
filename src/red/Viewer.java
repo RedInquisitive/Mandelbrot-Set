@@ -50,8 +50,6 @@ public class Viewer extends Canvas {
 				threads.remove(0);
 				i--;
 			}
-			lastWidth = currentWidth;
-			lastHeight = currentHeight;
 			image = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_RGB);
 			pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 			for(int i = 0; i < maxThreads; i++) {
@@ -94,6 +92,8 @@ public class Viewer extends Canvas {
 				
 			}
 		}
+		lastWidth = currentWidth;
+		lastHeight = currentHeight;
 		render(true);
 	}
 }
