@@ -97,18 +97,32 @@ public class Viewer extends Canvas {
 	 * @param cursorY
 	 */
 	public void zoom(int wheelRotation, int cursorX, int cursorY) {
-		double percentX = (double)cursorX / (double)lastWidth;
-		double percentY = (double)cursorY / (double)lastHeight;
+		double percentX = (double)cursorX / (double)currentWidth;
+		double percentY = (double)cursorY / (double)currentHeight;
+		
 		if(wheelRotation < 0) {
 			System.out.println("Zoom in!");
+			
+			x1 += (x2 - x1) * Config.ZOOM_SCALE / 2 * percentX;
+			x2 -= (x2 - x1) * Config.ZOOM_SCALE / 2 * (1.0-percentX);
+			y1 += (y2 - y1) * Config.ZOOM_SCALE / 2 * (percentY);
+			y2 -= (y2 - y1) * Config.ZOOM_SCALE / 2 * (1.0-percentY);
+
 			zoomLevel++;
 		}
 		if(wheelRotation > 0) {
 			System.out.println("Zoom out!");
-		    this.width = this.width * (1.0 + Config.ZOOM_SCALE);
-			this.height = this.height * (1.0 + Config.ZOOM_SCALE);
+			
+			x1 -= (x2 - x1) * Config.ZOOM_SCALE / 2 * percentX;
+			x2 += (x2 - x1) * Config.ZOOM_SCALE / 2 * (1.0-percentX);
+			y1 -= (y2 - y1) * Config.ZOOM_SCALE / 2 * (percentY);
+			y2 += (y2 - y1) * Config.ZOOM_SCALE / 2 * (1.0-percentY);
 			
 			zoomLevel--;
 		}
+		
+		Config.MAX_ITERATIONS += 25;
+
+		render();
 	}
 }
