@@ -6,7 +6,7 @@ public class Calculate extends Thread {
 	private final int thread, totalThreads;
 	private int[] pixels;
 	private final double x1, y1, x2, y2;
-	private int screenWidth, screenHeight;
+	private int screenWidth, screenHeight, currentIterations;
 	private boolean finished = false;
 	private boolean shouldQuit = false;
 	
@@ -23,7 +23,7 @@ public class Calculate extends Thread {
 	 * @param screenWidth The width of the screen
 	 * @param screenHeight The height of the screen.
 	 */
-	public Calculate(int[] pixels, int thread, int totalThreads, double x1, double y1, double x2, double y2, int screenWidth, int screenHeight) {
+	public Calculate(int[] pixels, int thread, int totalThreads, double x1, double y1, double x2, double y2, int screenWidth, int screenHeight, int currentIterations) {
 		this.setPriority(Thread.NORM_PRIORITY + 1);
 		this.thread = thread;
 		if(thread < 0 || thread >= totalThreads) {
@@ -37,6 +37,7 @@ public class Calculate extends Thread {
 		this.y2 = y2;
 		this.screenWidth = screenWidth;
 		this.screenHeight = screenHeight;
+		this.currentIterations = currentIterations;
 		System.out.println("Dispatching new thread. Thread number " + thread + " active.");
 	}
 	
@@ -48,7 +49,7 @@ public class Calculate extends Thread {
 				double c_imaginary = ((double)row / (double)screenHeight) * (y2 - y1) + y1;
 				double x = 0, y = 0;
 				int iteration = 0;
-				while(x * x + y * y <= 4.0 && iteration < Config.MAX_ITERATIONS) {
+				while(x * x + y * y <= 4.0 && iteration < currentIterations) {
 					double x_new = x * x - y * y + c_real;
 					y = 2.0 * x * y + c_imaginary;
 					x = x_new;
@@ -57,8 +58,8 @@ public class Calculate extends Thread {
 						break exit;
 					}
 				}
-				if(iteration < Config.MAX_ITERATIONS) {
-					int color = (int)((double)0xFF * (((double)iteration ) / (double)Config.MAX_ITERATIONS));
+				if(iteration < currentIterations) {
+					int color = (int)((double)0xFF * (((double)iteration ) / (double)currentIterations));
 					if(color > 0xFF) color = 0xFF;
 					pixels[col + row * screenWidth] = (color << 24) + (color << 16) + (color << 8) + color;
 				} else {

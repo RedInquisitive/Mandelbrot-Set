@@ -17,6 +17,7 @@ public class Viewer extends Canvas {
 	private int maxThreads = Runtime.getRuntime().availableProcessors();
 	
 	private int lastWidth, lastHeight, currentWidth, currentHeight = 0;
+	private int currentIterations = Config.DEFAULT_ITERATIONS;
 	
 	private double zoomLevel = 0;
 	private double x1, y1, x2, y2;
@@ -43,7 +44,7 @@ public class Viewer extends Canvas {
 		image = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_RGB);
 		pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 		for(int i = 0; i < maxThreads; i++) {
-			Calculate calculator = new Calculate(pixels, i, maxThreads, x1, y1, x2, y2, currentWidth, currentHeight);
+			Calculate calculator = new Calculate(pixels, i, maxThreads, x1, y1, x2, y2, currentWidth, currentHeight, currentIterations);
 			calculator.start();
 			threads.add(calculator);
 		}
@@ -88,6 +89,7 @@ public class Viewer extends Canvas {
 		this.y1 = (double)currentHeight/(double)currentWidth * -2.0;
 		this.x2 = 2.0;
 		this.y2 = (double)currentHeight/(double)currentWidth * 2.0;
+		currentIterations = Config.DEFAULT_ITERATIONS;
 	}
 
 	/**
@@ -109,6 +111,7 @@ public class Viewer extends Canvas {
 			y2 -= (y2 - y1) * Config.ZOOM_SCALE / 2 * (1.0-percentY);
 
 			zoomLevel++;
+			currentIterations += 25;
 		}
 		if(wheelRotation > 0) {
 			System.out.println("Zoom out!");
@@ -119,9 +122,8 @@ public class Viewer extends Canvas {
 			y2 += (y2 - y1) * Config.ZOOM_SCALE / 2 * (1.0-percentY);
 			
 			zoomLevel--;
+			currentIterations -= 25;
 		}
-		
-		Config.MAX_ITERATIONS += 25;
 
 		render();
 	}
