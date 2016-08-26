@@ -8,7 +8,7 @@ public class Config {
 	public static final int DEFAULT_SIZE_WIDTH = 1280,
 							DEFAULT_SIZE_HEIGHT = 720;
 	
-	public static final int MAX_ITERATIONS = 256;
+	public static final int MAX_ITERATIONS = 200;
 	
 	public static final double ZOOM_SCALE = .10;
 }

@@ -14,14 +14,12 @@ public class Main {
 	public static void main(String[] args) {
 		
         JFrame frame = new JFrame("Mandelbrot Set");
+        Viewer panel = new Viewer(Config.DEFAULT_SIZE_WIDTH, Config.DEFAULT_SIZE_HEIGHT);
         
         frame.setLayout(new BorderLayout());
+        frame.add(panel, BorderLayout.CENTER);
         frame.setSize(new Dimension(Config.DEFAULT_SIZE_WIDTH, Config.DEFAULT_SIZE_HEIGHT));
         frame.setMinimumSize(new Dimension(Config.DEFAULT_SIZE_WIDTH, Config.DEFAULT_SIZE_HEIGHT));
-        
-        Viewer panel = new Viewer(Config.DEFAULT_SIZE_WIDTH, Config.DEFAULT_SIZE_HEIGHT);
-
-        frame.add(panel, BorderLayout.CENTER);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -29,12 +27,11 @@ public class Main {
         
         frame.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
-                panel.setSize(frame.getWidth(), frame.getHeight(), true);
+                panel.setSize(frame.getWidth(), frame.getHeight());
             }
         });
         
         frame.addMouseWheelListener(new MouseWheelListener() {
-			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
 				if(e.getWheelRotation() != 0) {
 					panel.zoom(e.getWheelRotation(), e.getX(), e.getY());
@@ -42,11 +39,12 @@ public class Main {
 			}
         });
         
-        panel.setSize(frame.getWidth(), frame.getHeight(), true);
+        panel.setSize(frame.getWidth(), frame.getHeight());
+        panel.render();
         while (true) {
-        	panel.render(false);
+        	panel.draw();
         	try {
-				Thread.sleep(100);
+				Thread.sleep(10);
 			} catch (InterruptedException e1) {
 				Thread.currentThread().interrupt();
 			}

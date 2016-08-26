@@ -19,44 +19,44 @@ public class Viewer extends Canvas {
 	private int lastWidth, lastHeight, currentWidth, currentHeight = 0;
 	
 	private double zoomLevel = 0;
-	private double x, y, yRatio, width, height;
+	private double x1, y1, x2, y2;
 	
+	/**
+	 * Creates a Canvas to draw the fractal on.
+	 * @param width Width of this component
+	 * @param height Height of this component
+	 */
 	public Viewer(int width, int height) {
-		setSize(width, height, true);
+		setSize(width, height);
+		lastWidth = width;
+		lastHeight = height;
 	}
 	
-	public void setSize(int width, int height, boolean reset) {
-		this.currentWidth = width;
-		this.currentHeight = height;
-		if(reset) {
-			this.x = -2.0;
-			this.y = (double)height/(double)width * -2.0;
-			this.width = 4.0;
-			this.height = (double)height/(double)width * 4.0;
-			this.yRatio = this.height / 2.0;
+	/**
+	 * Renders the fractal.
+	 */
+	public void render() {
+		for(int i = threads.size(); i > 0 ; i--) {
+			threads.get(0).halt();
+			threads.remove(0);
 		}
-		if(getParent() != null) {
-			render(true);
+		image = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_RGB);
+		pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+		for(int i = 0; i < maxThreads; i++) {
+			Calculate calculator = new Calculate(pixels, i, maxThreads, x1, y1, x2, y2, currentWidth, currentHeight);
+			calculator.start();
+			threads.add(calculator);
 		}
 	}
 	
-	public void render(boolean redraw) {
-		if(redraw || lastWidth != currentWidth || lastHeight != currentHeight) {
-			for(int i = 0; i < threads.size(); i++) {
-				threads.get(0).interrupt();
-				while(threads.get(0).isRunning()) {
-					System.out.println("Borked");
-				}
-				threads.remove(0);
-				i--;
-			}
-			image = new BufferedImage(currentWidth, currentHeight, BufferedImage.TYPE_INT_RGB);
-			pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
-			for(int i = 0; i < maxThreads; i++) {
-				Calculate calculator = new Calculate(pixels, i, maxThreads, x, y, width, height, currentWidth, currentHeight);
-				calculator.start();
-				threads.add(calculator);
-			}
+	/**
+	 * Updates the screen
+	 */
+	public void draw() {
+		if(lastWidth != currentWidth || lastHeight != currentHeight) {
+			lastWidth = currentWidth;
+			lastHeight = currentHeight;
+			render();
 		}
 		
 		final BufferStrategy bs = getBufferStrategy();
@@ -71,18 +71,36 @@ public class Viewer extends Canvas {
 		Toolkit.getDefaultToolkit().sync();
 	}
 
+	/**
+	 * Sets the size of this component.
+	 */
+	public void setSize(int width, int height) {
+		this.currentWidth = width;
+		this.currentHeight = height;
+		reset();
+	}
+
+	/**
+	 * Resets the zoom of the fractal.
+	 */
+	public void reset() {
+		this.x1 = -2.0;
+		this.y1 = (double)currentHeight/(double)currentWidth * -2.0;
+		this.x2 = 2.0;
+		this.y2 = (double)currentHeight/(double)currentWidth * 2.0;
+	}
+
+	/**
+	 * Zooms to a region of the fractal
+	 * @param wheelRotation
+	 * @param cursorX
+	 * @param cursorY
+	 */
 	public void zoom(int wheelRotation, int cursorX, int cursorY) {
 		double percentX = (double)cursorX / (double)lastWidth;
 		double percentY = (double)cursorY / (double)lastHeight;
-		lastWidth = currentWidth;
-		lastHeight = currentHeight;
-		
 		if(wheelRotation < 0) {
 			System.out.println("Zoom in!");
-			
-			this.width = this.width * (1.0 - Config.ZOOM_SCALE);
-			this.height = this.height * (1.0 - Config.ZOOM_SCALE);
-			this.x -= percentX * (this.width - lastWidth);
 			zoomLevel++;
 		}
 		if(wheelRotation > 0) {
@@ -92,7 +110,5 @@ public class Viewer extends Canvas {
 			
 			zoomLevel--;
 		}
-
-		render(true);
 	}
 }
